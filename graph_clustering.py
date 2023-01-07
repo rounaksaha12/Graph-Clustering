@@ -2,6 +2,7 @@ import ijson
 import random
 import networkx as nx
 import numpy as np
+import pandas as pd
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 import matplotlib.pyplot as plt
@@ -98,6 +99,7 @@ id_mapping_file.close()
 
 edge_info_file=open(r'graph_info/edge_info.txt','w')
 mapped_edge_list=[]
+edge_info_file.write('u\tv\n')
 for edge in G.edges:
     u=id_to_order_map[edge[0]]
     v=id_to_order_map[edge[1]]
@@ -156,9 +158,17 @@ for intended_cluster_cnt in  range(2,11):
         output_file.write('Node '+str(i)+': '+str(test_cluster_assignments[i-train_data_limit])+'\n')
 
     combined_cluster_assignments=list(cluster_assignments)+list(test_cluster_assignments)
+    
     score=silhouette_score(distance_matrix,combined_cluster_assignments)
     output_file.write('Silhoutte score = '+str(score)+'\n')
     output_file.close()
+
+    cluster_assignments_file=open(r'outputs/cluster_assignments_ncluster_'+str(intended_cluster_cnt)+'.csv','w')
+    cluster_assignments_file.write('Node_id,Cluster_assignments\n')
+    for node_id in range(node_count):
+        cluster_assignments_file.write(str(node_id)+','+str(combined_cluster_assignments[node_id])+'\n')
+    cluster_assignments_file.close()
+    
     silhoutte_score_array.append(score)
     save_graph(G_mapped,intended_cluster_cnt,combined_cluster_assignments,r'outputs/clusterviz_ncluster_'+str(intended_cluster_cnt)+'.pdf')
 
